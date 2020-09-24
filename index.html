@@ -1,0 +1,42 @@
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>2048</title>
+
+		<script src="main.js"></script>
+
+		<style>
+			#game {
+				position: relative;
+				border: 1px solid black;
+				height: 396px;
+				width: 396px;
+			}
+
+			.cell {
+				width: 100px;
+				height: 100px;
+				font-size: 45px;
+				text-align: center;
+				background-color: whitesmoke;
+				position: absolute;
+				transition: left 0.05s, top 0.05s;
+				display: table;
+			}
+
+			.cell p {
+				display: table-cell;
+				vertical-align: middle;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="game"></div>
+		<button onclick="init()">Restart?</button>
+
+		<script>
+			init();
+		</script>
+	</body>
+</html>

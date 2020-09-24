@@ -1,0 +1,133 @@
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>2048 Editor</title>
+
+		<script>
+			const $ = id => document.getElementById(id);
+			function parseCSV(str) {
+				return str.split("\n").map(e => e.replace(/\s/g, "").split(","));
+			}
+			let json = {};
+			setInterval(() => {
+				json = {
+					dimensions: {
+						x: parseFloat($("x").value),
+						y: parseFloat($("y").value),
+						cellX: parseFloat($("cx").value),
+						cellY: parseFloat($("cy").value),
+						cellMarginX: parseFloat($("mx").value),
+						cellMarginY: parseFloat($("my").value),
+					},
+					requireSame: JSON.parse($("s").value),
+					operation: $("op").value,
+					names: parseCSV($("names").value).reduce((a, b) => {
+						if (b[0] == "") return a;
+						a[b[0]] = b[1];
+						return a;
+					}, {}),
+					startWeights: parseCSV($("w").value).reduce((a, b) => {
+						if (b[0] == "") return a;
+						a.push({
+							value: parseFloat(b[0]),
+							weight: parseFloat(b[1]),
+						});
+						return a;
+					}, []),
+					cellColors: parseCSV($("bg").value).reduce((a, b) => {
+						if (b[0] == "") return a;
+						a[b[0]] = b[1];
+						return a;
+					}, {}),
+					textColors: parseCSV($("c").value).reduce((a, b) => {
+						if (b[0] == "") return a;
+						a[b[0]] = b[1];
+						return a;
+					}, {}),
+				};
+
+				$("out").href = window.origin + "?" + btoa(JSON.stringify(json));
+			}, 50);
+		</script>
+	</head>
+	<body>
+		<table>
+			<tbody>
+				<tr>
+					<td>width</td>
+					<td><input id="x" value="4" />&nbsp;&nbsp;&nbsp;</td>
+					<td>height</td>
+					<td><input id="y" value="4" /></td>
+				</tr>
+				<tr>
+					<td>cell width</td>
+					<td><input id="cx" value="100" /></td>
+					<td>cell height</td>
+					<td><input id="cy" value="100" /></td>
+				</tr>
+				<tr>
+					<td>x margin</td>
+					<td><input id="mx" value="2" /></td>
+					<td>y margin</td>
+					<td><input id="my" value="2" /></td>
+				</tr>
+				<tr>
+					<td>operation</td>
+					<td>
+						<select id="op">
+							<option value="+">+</option>
+							<option value="-">-</option>
+							<option value="*">*</option>
+							<option value="/">/</option>
+							<option value="**">**</option>
+						</select>
+					</td>
+					<td>merge different</td>
+					<td>
+						<select id="s">
+							<option value="true">false</option>
+							<option value="false">true</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>names</td>
+					<td><textarea id="names"></textarea></td>
+					<td>weights</td>
+					<td>
+						<textarea id="w">
+2, 9
+4, 1
+                    </textarea
+						>
+					</td>
+				</tr>
+				<tr>
+					<td>background colors</td>
+					<td>
+						<textarea id="bg">
+2, f7f7ff
+4, efefff
+8, e2e2ff
+16, d6d6ff
+32, c7c7ff
+64, bcbcff
+128, a0a0ff
+256, 8585ff
+512, 6f6fff
+1024, 4040ff
+2048, 0000ff
+                        </textarea
+						>
+					</td>
+					<td>text colors</td>
+					<td><textarea id="c"></textarea></td>
+				</tr>
+				<tr>
+					<td><a id="out">Permalink</a></td>
+				</tr>
+			</tbody>
+		</table>
+	</body>
+</html>
