@@ -47,7 +47,10 @@
 					}, {}),
 				};
 
-				$("out").href = window.origin + "?" + btoa(JSON.stringify(json));
+				$("out").href = window.location.href.replace(
+					"/editor.html",
+					"?" + btoa(JSON.stringify(json))
+				);
 			}, 50);
 		</script>
 	</head>
