@@ -49,6 +49,7 @@ class Cell {
 		this.y = y;
 		this.value = value;
 		this.toRemove = false;
+		this.justMerged = false;
 
 		this.createElement();
 	}
@@ -173,6 +174,7 @@ class Board {
 				((direction % 2) * 2 - 1) *
 				(a.orderValue(Math.floor(direction / 2)) - b.orderValue(Math.floor(direction / 2)))
 		);
+		this.cells.forEach(e => (e.justMerged = false));
 		let change = false;
 		if (direction == 0) {
 			for (let j = 0; j < this.cells.length; j++) {
@@ -182,9 +184,10 @@ class Board {
 				if (x == 0) continue;
 				let t = this.find(x - 1, y);
 				if (t) {
-					if (json.requireSame && !(i.value == t.value)) continue;
+					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
 					eval(`t.value ${json.operation}= i.value`);
 					t.update();
+					t.justMerged = true;
 					i.removeElement();
 					i.toRemove = true;
 					i.div.zIndex = "-1000";
@@ -203,9 +206,10 @@ class Board {
 				if (x == this.x - 1) continue;
 				let t = this.find(x + 1, y);
 				if (t) {
-					if (json.requireSame && !(i.value == t.value)) continue;
+					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
 					eval(`t.value ${json.operation}= i.value`);
 					t.update();
+					t.justMerged = true;
 					i.removeElement();
 					i.toRemove = true;
 					i.div.zIndex = "-1000";
@@ -224,9 +228,10 @@ class Board {
 				if (y == this.y - 1) continue;
 				let t = this.find(x, y + 1);
 				if (t) {
-					if (json.requireSame && !(i.value == t.value)) continue;
+					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
 					eval(`t.value ${json.operation}= i.value`);
 					t.update();
+					t.justMerged = true;
 					i.removeElement();
 					i.toRemove = true;
 					i.div.zIndex = "-1000";
@@ -245,9 +250,10 @@ class Board {
 				if (y == 0) continue;
 				let t = this.find(x, y - 1);
 				if (t) {
-					if (json.requireSame && !(i.value == t.value)) continue;
+					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
 					eval(`t.value ${json.operation}= i.value`);
 					t.update();
+					t.justMerged = true;
 					i.removeElement();
 					i.toRemove = true;
 					i.div.zIndex = "-1000";
