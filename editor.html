@@ -47,10 +47,9 @@
 					}, {}),
 				};
 
-				$("out").href = window.location.href.replace(
-					"/editor.html",
-					"?" + btoa(JSON.stringify(json))
-				);
+				$("out").href = window.location.href
+					.replace(/\/editor/, "?" + btoa(JSON.stringify(json)))
+					.replace(".html", "");
 			}, 50);
 		</script>
 	</head>
