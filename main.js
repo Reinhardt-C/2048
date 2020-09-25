@@ -6,8 +6,16 @@ function init() {
 		.then(r => r.json())
 		.then(j => {
 			let url = window.location.href.split("?");
-			if (url.length > 1) json = JSON.parse(atob(url[1]));
-			else json = j;
+			if (url.length > 1) {
+				json = JSON.parse(atob(url[1]));
+				for (let i in j) {
+					if (json[i] == undefined) json[i] = j[i];
+					if (j[i] instanceof Object)
+						for (let k in j[i]) {
+							if (json[i][k] == undefined) json[i][k] = j[i][k];
+						}
+				}
+			} else json = j;
 
 			const g = document.getElementById("game");
 			g.style.width = json.dimensions.x * (json.dimensions.cellX + json.dimensions.cellMarginX);

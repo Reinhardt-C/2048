@@ -9,6 +9,9 @@
 			function parseCSV(str) {
 				return str.split("\n").map(e => e.replace(/\s/g, "").split(","));
 			}
+			function objEq(a, b) {
+				return JSON.stringify(a) == JSON.stringify(b);
+			}
 			let json = {};
 			setInterval(() => {
 				json = {
@@ -47,10 +50,58 @@
 					}, {}),
 				};
 
+				for (let i in json) {
+					if (objEq(json[i], def[i])) delete json[i];
+					for (let j in json[i]) {
+						if (objEq(json[i][j], def[i][j])) {
+							if (json[i] instanceof Array) json[i].splice(j, 1);
+							else delete json[i][j];
+						}
+					}
+				}
+
 				$("out").href = window.location.href
 					.replace(/\/editor/, "?" + btoa(JSON.stringify(json)))
 					.replace(".html", "");
 			}, 50);
+
+			let def = {
+				dimensions: {
+					x: 4,
+					y: 4,
+					cellX: 100,
+					cellY: 100,
+					cellMarginX: 2,
+					cellMarginY: 2,
+				},
+				startWeights: [
+					{
+						value: 2,
+						weight: 9,
+					},
+					{
+						value: 4,
+						weight: 1,
+					},
+				],
+				names: {},
+				requireSame: true,
+				operation: "+",
+				cellColors: {
+					2: "f7f7ff",
+					4: "efefff",
+					8: "e2e2ff",
+					16: "d6d6ff",
+					32: "c7c7ff",
+					64: "bcbcff",
+					128: "a0a0ff",
+					256: "8585ff",
+					512: "6f6fff",
+					1024: "4040ff",
+					2048: "0000ff",
+				},
+				textColors: {},
+			};
 		</script>
 	</head>
 	<body>
