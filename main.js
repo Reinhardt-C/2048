@@ -21,6 +21,14 @@ function init() {
 			const g = document.getElementById("game");
 			g.style.width = json.dimensions.x * (json.dimensions.cellX + json.dimensions.cellMarginX);
 			g.style.height = json.dimensions.y * (json.dimensions.cellY + json.dimensions.cellMarginY);
+			g.style.backgroundPosition = `-${json.dimensions.cellMarginX}px -${json.dimensions.cellMarginY}px`;
+			g.style.backgroundSize = `${json.dimensions.cellX + json.dimensions.cellMarginX}px ${
+				json.dimensions.cellY + json.dimensions.cellMarginY
+			}px`;
+			g.style.backgroundImage = `linear-gradient(to right, grey ${json.dimensions.cellMarginX}px, transparent ${json.dimensions.cellMarginX}px),
+									   linear-gradient(to bottom, grey ${json.dimensions.cellMarginY}px, transparent ${json.dimensions.cellMarginY}px)`;
+			g.style.borderTop = `solid grey ${json.dimensions.cellMarginY}px`;
+			g.style.borderLeft = `solid grey ${json.dimensions.cellMarginX}px`;
 
 			board = new Board(json.dimensions.x, json.dimensions.y);
 
@@ -84,7 +92,9 @@ class Cell {
 			.split("<br>")
 			.map(e => e.replace(/<[\/\w]*>/g, "").replace(/&\w*;/g, "$").length)
 			.reduce((a, b) => Math.max(a, b));
-		div.style.fontSize = ((json.dimensions.cellX / 100) * 60) / Math.pow(len, 0.6) + "px";
+		div.style.fontSize =
+			((Math.min(json.dimensions.cellX, json.dimensions.cellY) / 100) * 60) / Math.pow(len, 0.6) +
+			"px";
 		div.style.backgroundColor = json.cellColors[this.value]
 			? "#" + json.cellColors[this.value]
 			: "";
@@ -102,7 +112,9 @@ class Cell {
 			.split("<br>")
 			.map(e => e.replace(/<[\/\w]*>/g, "").replace(/&\w*;/g, "$").length)
 			.reduce((a, b) => Math.max(a, b));
-		this.div.style.fontSize = ((json.dimensions.cellX / 100) * 60) / Math.pow(len, 0.6) + "px";
+		this.div.style.fontSize =
+			((Math.min(json.dimensions.cellX, json.dimensions.cellY) / 100) * 60) / Math.pow(len, 0.6) +
+			"px";
 		this.div.innerHTML = `<p>${this.dispValue}</p>`;
 		this.div.style.backgroundColor = json.cellColors[this.value]
 			? "#" + json.cellColors[this.value]

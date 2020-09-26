@@ -7,11 +7,48 @@
 		<script src="main.js"></script>
 
 		<style>
+			body {
+				background-color: #565857;
+				width: min-content;
+			}
+
+			:focus {
+				outline: none;
+			}
+
 			#game {
 				position: relative;
-				border: 1px solid black;
 				height: 396px;
 				width: 396px;
+				background-position: -2px -2px;
+				background-size: 102px 102px;
+				background-image: linear-gradient(to right, grey 2px, transparent 2px),
+					linear-gradient(to bottom, grey 2px, transparent 2px);
+				border-radius: 5px;
+			}
+
+			#editor {
+				font-family: inherit;
+				color: black;
+				text-decoration: none;
+				display: inline-block;
+				text-align: center;
+				padding: 0;
+				font-family: Arial, Helvetica, sans-serif;
+				box-sizing: border-box;
+			}
+			#restart,
+			#editor {
+				background-color: #b4b2b2;
+				border: 2px solid grey;
+				border-radius: 3px;
+				font-size: 20px;
+				width: 100%;
+				cursor: pointer;
+			}
+			#restart:active,
+			#editor:active {
+				background-color: #9c9a9a;
 			}
 
 			.cell {
@@ -33,7 +70,8 @@
 	</head>
 	<body>
 		<div id="game"></div>
-		<button onclick="init()">Restart?</button>&nbsp;<a href="./editor">Editor</a>
+		<button id="restart" onclick="init()">Restart</button>
+		<a id="editor" href="./editor">Editor</a>
 
 		<script>
 			init();
