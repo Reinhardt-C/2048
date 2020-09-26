@@ -4,8 +4,8 @@
 		"y": 4,
 		"cellX": 100,
 		"cellY": 100,
-		"cellMarginX": 2,
-		"cellMarginY": 2
+		"cellMarginX": 5,
+		"cellMarginY": 5
 	},
 	"startWeights": [
 		{
