@@ -4,6 +4,88 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>2048 Editor</title>
 
+		<style>
+			body {
+				background-color: #565857;
+				text-align: center;
+			}
+
+			pre {
+				text-align: left;
+				background-color: lightgrey;
+				cursor: text;
+			}
+
+			input {
+				background-color: #dddddd;
+				border: none;
+			}
+
+			select,
+			a {
+				background-color: #b4b2b2;
+				border: 2px solid grey;
+				border-radius: 3px;
+				font-size: 20px;
+				cursor: pointer;
+			}
+			a {
+				display: inline-block;
+				width: 100%;
+				text-decoration: none;
+				color: black;
+				font-family: Arial, Helvetica, sans-serif;
+			}
+
+			:focus {
+				outline: none;
+			}
+
+			.flexbox {
+				display: flexbox;
+			}
+
+			.sb {
+				background-color: #b4b2b2;
+				border: 2px solid grey;
+				border-radius: 3px;
+				font-size: 20px;
+				width: 100%;
+				cursor: pointer;
+			}
+			.sb:active {
+				background-color: #9c9a9a;
+			}
+
+			.sd {
+				display: block;
+				min-height: 80px;
+				background-color: #aaaaaa;
+				border: 2px solid grey;
+				border-radius: 3px;
+			}
+			.sd:not(.shown) {
+				display: none;
+			}
+
+			tr, th {
+				width: 200px;
+				background-color: #dddddd;
+			}
+
+			.new {
+				background-color: #b4b2b2;
+				border: 2px solid grey;
+				border-radius: 3px;
+				font-size: 20px;
+				cursor: pointer;
+				margin: 3px;
+			}
+			.new:active {
+				background-color: #9c9a9a;
+			}
+		</style>
+
 		<script>
 			const $ = id => document.getElementById(id);
 			function parseCSV(str) {
@@ -23,36 +105,21 @@
 						cellMarginX: parseFloat($("mx").value),
 						cellMarginY: parseFloat($("my").value),
 					},
-					requireSame: JSON.parse($("s").value),
-					operation: $("op").value,
-					names: parseCSV($("names").value).reduce((a, b) => {
-						if (b[0] == "") return a;
-						a[b[0]] = b[1];
-						return a;
-					}, {}),
-					startWeights: parseCSV($("w").value).reduce((a, b) => {
-						if (b[0] == "") return a;
-						a.push({
-							value: parseFloat(b[0]),
-							weight: parseFloat(b[1]),
-						});
-						return a;
-					}, []),
-					cellColors: parseCSV($("bg").value).reduce((a, b) => {
-						if (b[0] == "") return a;
-						a[b[0]] = b[1];
-						return a;
-					}, {}),
-					textColors: parseCSV($("c").value).reduce((a, b) => {
-						if (b[0] == "") return a;
-						a[b[0]] = b[1];
-						return a;
-					}, {}),
+					operation: "+",
+					opFunc: $("c0").innerText,
+					mergeFunc: $("c1").innerText,
+					colorFunc: $("c2").innerText,
+					textFunc: $("c3").innerText,
+					bgColor: $('bc').value,
+					gridColor: $('gc').value,
+					names: parseNames(),
+					startWeights: parseWeights(),
 				};
 
 				for (let i in json) {
 					if (objEq(json[i], def[i])) delete json[i];
 					for (let j in json[i]) {
+						if (json[i] instanceof Array) continue;
 						if (objEq(json[i][j], def[i][j])) {
 							if (json[i] instanceof Array) json[i].splice(j, 1);
 							else delete json[i][j];
@@ -85,102 +152,162 @@
 					},
 				],
 				names: {},
-				requireSame: true,
 				operation: "+",
-				cellColors: {
-					2: "f7f7ff",
-					4: "efefff",
-					8: "e2e2ff",
-					16: "d6d6ff",
-					32: "c7c7ff",
-					64: "bcbcff",
-					128: "a0a0ff",
-					256: "8585ff",
-					512: "6f6fff",
-					1024: "4040ff",
-					2048: "0000ff",
-				},
-				textColors: {},
+				opFunc: "(a, b) => a + b",
+				mergeFunc: "(a, b) => a == b",
+				colorFunc: "n => Math.floor((12 - Math.log2(n)) * 65535 / 11) * 256 + 255",
+				textFunc: "n => 0x000000",
+				bgColor: "#565857",
+				gridColor: "grey"
 			};
 		</script>
 	</head>
 	<body>
-		<table>
-			<tbody>
-				<tr>
-					<td>width</td>
-					<td><input id="x" value="4" />&nbsp;&nbsp;&nbsp;</td>
-					<td>height</td>
-					<td><input id="y" value="4" /></td>
-				</tr>
-				<tr>
-					<td>cell width</td>
-					<td><input id="cx" value="100" /></td>
-					<td>cell height</td>
-					<td><input id="cy" value="100" /></td>
-				</tr>
-				<tr>
-					<td>x margin</td>
-					<td><input id="mx" value="5" /></td>
-					<td>y margin</td>
-					<td><input id="my" value="5" /></td>
-				</tr>
-				<tr>
-					<td>operation</td>
-					<td>
-						<select id="op">
-							<option value="+">+</option>
-							<option value="-">-</option>
-							<option value="*">*</option>
-							<option value="/">/</option>
-							<option value="**">**</option>
-						</select>
-					</td>
-					<td>merge different</td>
-					<td>
-						<select id="s">
-							<option value="true">false</option>
-							<option value="false">true</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>names</td>
-					<td><textarea id="names"></textarea></td>
-					<td>weights</td>
-					<td>
-						<textarea id="w">
-2, 9
-4, 1
-                    </textarea
-						>
-					</td>
-				</tr>
-				<tr>
-					<td>background colors</td>
-					<td>
-						<textarea id="bg">
-2, f7f7ff
-4, efefff
-8, e2e2ff
-16, d6d6ff
-32, c7c7ff
-64, bcbcff
-128, a0a0ff
-256, 8585ff
-512, 6f6fff
-1024, 4040ff
-2048, 0000ff
-                        </textarea
-						>
-					</td>
-					<td>text colors</td>
-					<td><textarea id="c"></textarea></td>
-				</tr>
-				<tr>
-					<td><a id="out">Permalink</a></td>
-				</tr>
-			</tbody>
-		</table>
+		<h1>2048 Editor</h1>
+		<div class="flexbox">
+			<div class="section" id="s0">
+				<button class="sb" id="sb0">Grid Dimensions</button>
+				<div class="sd" id="sd0">
+					<span>Width of the grid: <input id="x" value="4" /></span><br />
+					<span>Height of the grid: <input id="y" value="4" /></span>
+				</div>
+			</div>
+			<div class="section" id="s1">
+				<button class="sb" id="sb1">Cell Dimensions</button>
+				<div class="sd" id="sd1">
+					<span>Width of a cell: <input id="cx" value="100" /></span><br />
+					<span>Height of a cell: <input id="cy" value="100" /></span>
+				</div>
+			</div>
+			<div class="section" id="s2">
+				<button class="sb" id="sb2">Cell Margins</button>
+				<div class="sd" id="sd2">
+					<span>Distance between cells horizontally: <input id="mx" value="5" /></span><br />
+					<span>Distance between cells vertically: <input id="my" value="5" /></span>
+				</div>
+			</div>
+			<div class="section" id="s3">
+				<button class="sb" id="sb3">Cell Merging</button>
+				<div class="sd" id="sd3">
+					a is the value of the tile being merged into the tile with value b<br />
+					<span>
+						Function to determine result:
+						<pre><code id='c0' contenteditable="true">(a, b) => a + b</code></pre>
+					<br />
+					<span>
+						Function to determine if they can merge:
+						<pre><code id='c1' contenteditable="true">(a, b) => a == b</code></pre>
+					</span>
+				</div>
+			</div>
+			<div class="section" id="s4">
+				<button class="sb" id="sb4">Cell Colors</button>
+				<div class="sd" id="sd4">
+					These functions take the value of the cell and return a number, which will be converted to
+					hexadecimal to get the color<br />
+					<span
+						>Function to determine background color:
+						<pre><code id='c2' contenteditable="true">n => Math.floor((12 - Math.log2(n)) * 65535 / 11) * 256 + 255</code></pre></span
+					><br />
+					<span
+						>Function to determine text color:
+						<pre><code id='c3' contenteditable="true">n => 0x000000</code></pre>
+					</span>
+				</div>
+			</div>
+			<div class="section" id="s5">
+				<button class="sb" id="sb5">Custom Names</button>
+				<div class="sd" id="sd5" style="text-align: left;">
+					<table>
+						<tbody id="namewrapper">
+							<th>Cell Value</th>
+							<th>Cell Name</th>
+						</tbody>
+					</table>
+					<button class='new' onclick="newName('', '')">+</button>
+				</div>
+			</div>
+			<div class="section" id="s6" style="text-align: left;">
+				<button class="sb" id="sb6">Spawn Weights</button>
+				<div class="sd" id="sd6">
+					<table>
+						<tbody id="weightwrapper">
+							<th>Cell Value</th>
+							<th>Cell Weight</th>
+						</tbody>
+					</table>
+					<button class='new' onclick="newWeight('', '')">+</button>
+				</div>
+			</div>
+			<div class="section" id="s7">
+				<button class="sb" id="sb7">Page Attributes</button>
+				<div class="sd" id="sd7">
+					<span>Background color: <input id="bc" value="#565857" /></span><br />
+					<span>Grid color: <input id="gc" value="grey" /></span>
+				</div>
+			</div>
+			<br />
+			<a href="" id="out">Play</a>
+		</div>
+
+		<script>
+			let c = document.querySelectorAll(".section").length;
+			for (let i = 0; i < c; i++) {
+				document.getElementById(`sb${i}`).addEventListener(
+					"click",
+					new Function(`
+						document.getElementById(\`sd${i}\`).classList.toggle('shown')
+					`)
+				);
+			}
+
+			function newName(val, name) {
+				let table = document.createElement('tr');
+				table.id = 'n' + val;
+				table.className = 'row';
+				table.innerHTML = (`
+					<td contenteditable>${val}</td>
+					<td contenteditable>${name}</td>
+				`);
+				document.getElementById('namewrapper').appendChild(table);
+			}
+			function removeName(val) {
+				document.getElementById('namewrapper').removeChild(document.getElementById('n' + val));
+			}
+			function parseNames() {
+				let rows = document.querySelectorAll('.row');
+				let obj = {}
+				for (let i = 0; i < rows.length; i++)
+					if (!isNaN(parseFloat(rows[i].children[0].innerText)))
+						obj[parseFloat(rows[i].children[0].innerText)] = rows[i].children[1].innerText;
+				return obj;
+			}
+			function newWeight(val, weight) {
+				let table = document.createElement('tr');
+				table.id = 'w' + val;
+				table.className = 'row2';
+				table.innerHTML = (`
+					<td contenteditable>${val}</td>
+					<td contenteditable>${weight}</td>
+				`);
+				document.getElementById('weightwrapper').appendChild(table);
+			}
+			newWeight(2, 9);
+			newWeight(4, 1);
+			function removeWeight(val) {
+				document.getElementById('weightwrapper').removeChild(document.getElementById('w' + val));
+			}
+			function parseWeights() {
+				let rows = document.querySelectorAll('.row2');
+				let obj = []
+				for (let i = 0; i < rows.length; i++) 
+					if (!isNaN(parseFloat(rows[i].children[0].innerText))) obj.push({
+						value: parseFloat(rows[i].children[0].innerText), 
+						weight: parseFloat(rows[i].children[1].innerText)
+					});
+				
+				return obj;
+			}
+		</script>
 	</body>
 </html>

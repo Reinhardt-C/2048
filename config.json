@@ -18,20 +18,11 @@
 		}
 	],
 	"names": {},
-	"requireSame": true,
 	"operation": "+",
-	"cellColors": {
-		"2": "f7f7ff",
-		"4": "efefff",
-		"8": "e2e2ff",
-		"16": "d6d6ff",
-		"32": "c7c7ff",
-		"64": "bcbcff",
-		"128": "a0a0ff",
-		"256": "8585ff",
-		"512": "6f6fff",
-		"1024": "4040ff",
-		"2048": "0000ff"
-	},
-	"textColors": {}
+	"opFunc": "(a, b) => a + b",
+	"mergeFunc": "(a, b) => a == b",
+	"colorFunc": "n => Math.floor((12 - Math.log2(n)) * 65535 / 11) * 256 + 255",
+	"textFunc": "n => 0x000000",
+	"bgColor": "#565857",
+	"gridColor": "grey"
 }

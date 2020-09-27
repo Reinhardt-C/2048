@@ -18,6 +18,13 @@ function init() {
 				}
 			} else json = j;
 
+			json.mergeFunc = new Function("return " + json.mergeFunc)();
+			json.colorFunc = new Function("return " + json.colorFunc)();
+			json.textFunc = new Function("return " + json.textFunc)();
+			json.opFunc = new Function("return " + json.opFunc)();
+
+			document.body.style.backgroundColor = json.bgColor;
+
 			const g = document.getElementById("game");
 			g.style.width = json.dimensions.x * (json.dimensions.cellX + json.dimensions.cellMarginX);
 			g.style.height = json.dimensions.y * (json.dimensions.cellY + json.dimensions.cellMarginY);
@@ -25,10 +32,12 @@ function init() {
 			g.style.backgroundSize = `${json.dimensions.cellX + json.dimensions.cellMarginX}px ${
 				json.dimensions.cellY + json.dimensions.cellMarginY
 			}px`;
-			g.style.backgroundImage = `linear-gradient(to right, grey ${json.dimensions.cellMarginX}px, transparent ${json.dimensions.cellMarginX}px),
-									   linear-gradient(to bottom, grey ${json.dimensions.cellMarginY}px, transparent ${json.dimensions.cellMarginY}px)`;
-			g.style.borderTop = `solid grey ${json.dimensions.cellMarginY}px`;
-			g.style.borderLeft = `solid grey ${json.dimensions.cellMarginX}px`;
+			g.style.backgroundImage = `linear-gradient(to right, ${json.gridColor} ${json.dimensions.cellMarginX}px, 
+										transparent ${json.dimensions.cellMarginX}px),
+									   linear-gradient(to bottom, ${json.gridColor} ${json.dimensions.cellMarginY}px,
+										transparent ${json.dimensions.cellMarginY}px)`;
+			g.style.borderTop = `solid ${json.gridColor} ${json.dimensions.cellMarginY}px`;
+			g.style.borderLeft = `solid ${json.gridColor} ${json.dimensions.cellMarginX}px`;
 
 			board = new Board(json.dimensions.x, json.dimensions.y);
 
@@ -95,10 +104,8 @@ class Cell {
 		div.style.fontSize =
 			((Math.min(json.dimensions.cellX, json.dimensions.cellY) / 100) * 60) / Math.pow(len, 0.6) +
 			"px";
-		div.style.backgroundColor = json.cellColors[this.value]
-			? "#" + json.cellColors[this.value]
-			: "";
-		div.style.color = json.textColors[this.value] ? "#" + json.textColors[this.value] : "";
+		div.style.backgroundColor = "#" + hex(json.colorFunc(this.value));
+		div.style.color = "#" + hex(json.textFunc(this.value));
 		div.className = "cell";
 		div.innerHTML = `<p>${this.dispValue}</p>`;
 		document.getElementById("game").appendChild(div);
@@ -116,10 +123,8 @@ class Cell {
 			((Math.min(json.dimensions.cellX, json.dimensions.cellY) / 100) * 60) / Math.pow(len, 0.6) +
 			"px";
 		this.div.innerHTML = `<p>${this.dispValue}</p>`;
-		this.div.style.backgroundColor = json.cellColors[this.value]
-			? "#" + json.cellColors[this.value]
-			: "";
-		this.div.style.color = json.textColors[this.value] ? "#" + json.textColors[this.value] : "";
+		this.div.style.backgroundColor = "#" + hex(json.colorFunc(this.value));
+		this.div.style.color = "#" + hex(json.textFunc(this.value));
 	}
 
 	removeElement() {
@@ -140,21 +145,26 @@ class Board {
 	}
 
 	get complete() {
-		if (!json.requireSame) return false;
 		if (this.cells.length == 0) return false;
 		for (let i of this.cells) {
-			if (i.x !== 0 && (!this.find(i.x - 1, i.y) || this.find(i.x - 1, i.y).value == i.value))
+			if (
+				i.x !== 0 &&
+				(!this.find(i.x - 1, i.y) || json.mergeFunc(this.find(i.x - 1, i.y).value, i.value))
+			)
 				return false;
 			if (
 				i.x !== this.x - 1 &&
-				(!this.find(i.x + 1, i.y) || this.find(i.x + 1, i.y).value == i.value)
+				(!this.find(i.x + 1, i.y) || json.mergeFunc(this.find(i.x + 1, i.y).value, i.value))
 			)
 				return false;
-			if (i.y !== 0 && (!this.find(i.x, i.y - 1) || this.find(i.x, i.y - 1).value == i.value))
+			if (
+				i.y !== 0 &&
+				(!this.find(i.x, i.y - 1) || json.mergeFunc(this.find(i.x, i.y - 1).value, i.value))
+			)
 				return false;
 			if (
 				i.y !== this.y - 1 &&
-				(!this.find(i.x, i.y + 1) || this.find(i.x, i.y + 1).value == i.value)
+				(!this.find(i.x, i.y + 1) || json.mergeFunc(this.find(i.x, i.y + 1).value, i.value))
 			)
 				return false;
 		}
@@ -205,8 +215,8 @@ class Board {
 				if (x == 0) continue;
 				let t = this.find(x - 1, y);
 				if (t) {
-					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
-					eval(`t.value ${json.operation}= i.value`);
+					if (t.justMerged || !json.mergeFunc(i.value, t.value)) continue;
+					t.value = json.opFunc(i.value, t.value);
 					t.update();
 					t.justMerged = true;
 					i.removeElement();
@@ -215,7 +225,7 @@ class Board {
 				}
 				i.x--;
 				i.update();
-				j--;
+				if (!i.toRemove) j--;
 				change = true;
 			}
 		}
@@ -227,8 +237,8 @@ class Board {
 				if (x == this.x - 1) continue;
 				let t = this.find(x + 1, y);
 				if (t) {
-					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
-					eval(`t.value ${json.operation}= i.value`);
+					if (t.justMerged || !json.mergeFunc(i.value, t.value)) continue;
+					t.value = json.opFunc(i.value, t.value);
 					t.update();
 					t.justMerged = true;
 					i.removeElement();
@@ -237,7 +247,7 @@ class Board {
 				}
 				i.x++;
 				i.update();
-				j--;
+				if (!i.toRemove) j--;
 				change = true;
 			}
 		}
@@ -249,8 +259,8 @@ class Board {
 				if (y == this.y - 1) continue;
 				let t = this.find(x, y + 1);
 				if (t) {
-					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
-					eval(`t.value ${json.operation}= i.value`);
+					if (t.justMerged || !json.mergeFunc(i.value, t.value)) continue;
+					t.value = json.opFunc(i.value, t.value);
 					t.update();
 					t.justMerged = true;
 					i.removeElement();
@@ -259,7 +269,7 @@ class Board {
 				}
 				i.y++;
 				i.update();
-				j--;
+				if (!i.toRemove) j--;
 				change = true;
 			}
 		}
@@ -271,8 +281,8 @@ class Board {
 				if (y == 0) continue;
 				let t = this.find(x, y - 1);
 				if (t) {
-					if (t.justMerged || (json.requireSame && !(i.value == t.value))) continue;
-					eval(`t.value ${json.operation}= i.value`);
+					if (t.justMerged || !json.mergeFunc(i.value, t.value)) continue;
+					t.value = json.opFunc(i.value, t.value);
 					t.update();
 					t.justMerged = true;
 					i.removeElement();
@@ -281,7 +291,7 @@ class Board {
 				}
 				i.y--;
 				i.update();
-				j--;
+				if (!i.toRemove) j--;
 				change = true;
 			}
 		}
@@ -300,4 +310,9 @@ function chooseWeighted(items) {
 	chances = chances.map(el => (acc = el + acc));
 	var rand = Math.random() * sum;
 	return items[chances.filter(el => el <= rand).length] || items[0];
+}
+
+function hex(n) {
+	n = Math.floor(n) % (0xffffff + 1);
+	return "0".repeat(6 - n.toString(16).replace("-", "").length) + n.toString(16);
 }
