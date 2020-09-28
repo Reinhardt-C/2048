@@ -1,0 +1,25 @@
+{
+	"dimensions": {
+		"x": 4,
+		"y": 4,
+		"cellX": 100,
+		"cellY": 100,
+		"cellMarginX": 2,
+		"cellMarginY": 2
+	},
+	"startWeights": [
+		{
+			"value": 2,
+			"weight": 9
+		},
+		{
+			"value": 4,
+			"weight": 1
+		}
+	],
+	"names": {},
+	"opFunc": "(a, b) => a + b",
+	"mergeFunc": "(a, b) => a == b",
+	"colorFunc": "n => Math.floor((12 - Math.log2(n)) * 65535 / 11) * 256 + 255",
+	"textFunc": "n => 0x000000"
+}

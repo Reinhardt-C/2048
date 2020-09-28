@@ -127,9 +127,9 @@
 					}
 				}
 
-				$("out").href = window.location.href
-					.replace(/\/editor/, "?" + btoa(JSON.stringify(json)))
-					.replace(".html", "") + "0";
+				$("out").href = document.URL
+					.replace(/\/editor/, "?" + encodeURIComponent(btoa(JSON.stringify(json))))
+					.replace(".html", "");
 			}, 50);
 
 			let def = {
