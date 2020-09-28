@@ -5,7 +5,7 @@ function init() {
 	fetch("config.json")
 		.then(r => r.json())
 		.then(j => {
-			let url = window.location.href.split("?");
+			let url = window.location.href.replace(/0$/, "").split("?");
 			if (url.length > 1) {
 				json = JSON.parse(atob(url[1]));
 				for (let i in j) {

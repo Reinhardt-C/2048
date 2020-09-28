@@ -129,7 +129,7 @@
 
 				$("out").href = window.location.href
 					.replace(/\/editor/, "?" + btoa(JSON.stringify(json)))
-					.replace(".html", "");
+					.replace(".html", "") + "0";
 			}, 50);
 
 			let def = {
