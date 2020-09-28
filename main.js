@@ -10,11 +10,8 @@ function init() {
 				json = JSON.parse(atob(url[1]));
 				for (let i in j) {
 					if (json[i] == undefined) json[i] = j[i];
-					if (j[i] instanceof Object)
-						if (!(j[i] instanceof Array))
-							for (let k in j[i]) {
-								if (json[i][k] == undefined) json[i][k] = j[i][k];
-							}
+					if (j[i] instanceof Object && !(j[i] instanceof Array))
+						for (let k in j[i]) if (json[i][k] == undefined) json[i][k] = j[i][k];
 				}
 			} else json = j;
 
